@@ -22,9 +22,12 @@ export default function Hero() {
   }, [])
 
   return (
-    <section className="hero" id="home">
-      <div className="hero-glow" aria-hidden="true"></div>
-      <div className={'hero-stage' + (entered ? ' is-entered' : '')}>
+    <section className={'hero' + (entered ? ' is-entered' : '')} id="home">
+      <div className="hero-tree" aria-hidden="true">
+        <img src="/images/hero-tree-bg.png?v=2" alt="" decoding="async" />
+      </div>
+
+      <div className="hero-stage">
         <div className="hero-copy">
           <p className="hero-overline">
             <span aria-hidden="true">✦</span>
