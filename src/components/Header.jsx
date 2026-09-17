@@ -22,8 +22,9 @@ export default function Header() {
     const update = () => {
       const hero = document.getElementById('home')
       const hh = headerRef.current ? headerRef.current.offsetHeight : 72
-      setSolid(window.scrollY > 24)
-      setPastHero(hero ? hero.getBoundingClientRect().bottom <= hh + 12 : true)
+      const past = hero ? hero.getBoundingClientRect().bottom <= hh + 12 : true
+      setPastHero(past)
+      setSolid(past || menuOpen)
       ticking = false
     }
     const onScroll = () => { if (!ticking) { ticking = true; requestAnimationFrame(update) } }
@@ -34,9 +35,14 @@ export default function Header() {
       window.removeEventListener('scroll', onScroll)
       window.removeEventListener('resize', onScroll)
     }
-  }, [])
+  }, [menuOpen])
 
-  useEffect(() => { setSolid(window.scrollY > 24 || menuOpen) }, [menuOpen])
+  useEffect(() => {
+    const hero = document.getElementById('home')
+    const hh = headerRef.current ? headerRef.current.offsetHeight : 72
+    const past = hero ? hero.getBoundingClientRect().bottom <= hh + 12 : window.scrollY > 24
+    setSolid(past || menuOpen)
+  }, [menuOpen])
 
   useEffect(() => {
     const sync = () => {
