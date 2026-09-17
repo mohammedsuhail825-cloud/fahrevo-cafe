@@ -8,8 +8,8 @@ export const SITE = {
   whatsapp: '919160919897',
   addressLines: ['Cloud kitchen · Mehdipatnam,', 'Hyderabad'],
   mapsUrl: 'https://www.google.com/maps/search/?api=1&query=Fahrévo%20Cafe%20Hyderabad',
-  heroUrl: '/images/hero-cake.jpg?v=4',
-  aboutUrl: '/images/kinder-crunch.jpg?v=2',
+  heroUrl: '/images/hero-cake.jpg?v=5',
+  aboutUrl: '/images/menu-crunch.png?v=5',
   instagram: null,
 }
 
