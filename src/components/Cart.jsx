@@ -3,7 +3,7 @@ import { useCart } from '../context/CartContext.jsx'
 
 export default function Cart() {
   const {
-    items, open, setOpen, setQty, removeItem, totalQty, whatsappUrl,
+    items, open, setOpen, setQty, removeItem, totalQty, whatsappUrl, placeOrder, placing,
     customerName, setCustomerName, customerPhone, setCustomerPhone,
     address, setAddress, locStatus, locError, requestAddress,
   } = useCart()
@@ -111,10 +111,18 @@ export default function Cart() {
             href={canOrder ? whatsappUrl : undefined}
             target="_blank"
             rel="noopener noreferrer"
-            aria-disabled={!canOrder}
-            onClick={e => { if (!canOrder) e.preventDefault() }}
+            aria-disabled={!canOrder || placing}
+            onClick={async e => {
+              e.preventDefault()
+              if (!canOrder || placing) return
+              // Open the tab now (inside the tap) so mobile browsers don't block it, then point it at WhatsApp.
+              const tab = window.open('', '_blank')
+              const { url } = await placeOrder()
+              if (tab) tab.location.href = url
+              else window.location.href = url
+            }}
           >
-            <span>Share order on WhatsApp</span>
+            <span>{placing ? 'Placing order…' : 'Share order on WhatsApp'}</span>
             <svg className="btn-arrow" viewBox="0 0 16 16" aria-hidden="true"><path d="M1.5 8h12M9.5 3.5 14 8l-4.5 4.5"/></svg>
           </a>
         </footer>

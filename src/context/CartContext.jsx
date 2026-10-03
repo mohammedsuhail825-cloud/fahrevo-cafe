@@ -46,6 +46,29 @@ function detectAddress() {
   })
 }
 
+// Fahrévo OS order inbox. Local demo: the OS runs on this machine; set VITE_FAHREVO_OS_URL when deployed.
+const OS_URL = (import.meta.env.VITE_FAHREVO_OS_URL || 'http://localhost:3100').replace(/\/$/, '')
+
+function buildWhatsappUrl({ items, ref, customerName, customerPhone, address, mapsUrl }) {
+  if (!items.length) return `https://wa.me/${SITE.whatsapp}`
+  const lines = [
+    ref ? `Hi! I've placed order ${ref} at ${SITE.name}:` : `Hi! I'd like to place an order at ${SITE.name}:`,
+    '',
+    '— Order —',
+    ...items.map(x => `• ${x.name} × ${x.qty}`),
+    '',
+    `Total items: ${items.reduce((a, x) => a + x.qty, 0)}`,
+    '',
+    '— Delivery details —',
+    `Name: ${customerName.trim() || '—'}`,
+    `Phone: ${customerPhone.trim() || '—'}`,
+    `Address: ${address.trim() || '—'}`,
+  ]
+  if (mapsUrl) lines.push(`Location: ${mapsUrl}`)
+  lines.push('', ref ? 'Please share the payment details. Thank you!' : 'Please confirm availability. Thank you!')
+  return `https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(lines.join('\n'))}`
+}
+
 export function CartProvider({ children }) {
   const [items, setItems] = useState([])
   const [open, setOpen] = useState(false)
@@ -103,32 +126,47 @@ export function CartProvider({ children }) {
 
   const totalQty = useMemo(() => items.reduce((a, x) => a + x.qty, 0), [items])
 
-  const whatsappUrl = useMemo(() => {
-    if (!items.length) return `https://wa.me/${SITE.whatsapp}`
-    const lines = [
-      `Hi! I'd like to place an order at ${SITE.name}:`,
-      '',
-      '— Order —',
-      ...items.map(x => `• ${x.name} × ${x.qty}`),
-      '',
-      `Total items: ${items.reduce((a, x) => a + x.qty, 0)}`,
-      '',
-      '— Delivery details —',
-      `Name: ${customerName.trim() || '—'}`,
-      `Phone: ${customerPhone.trim() || '—'}`,
-      `Address: ${address.trim() || '—'}`,
-    ]
-    if (mapsUrl) lines.push(`Location: ${mapsUrl}`)
-    lines.push('', 'Please confirm availability. Thank you!')
-    return `https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(lines.join('\n'))}`
+  const whatsappUrl = useMemo(
+    () => buildWhatsappUrl({ items, ref: '', customerName, customerPhone, address, mapsUrl }),
+    [items, customerName, customerPhone, address, mapsUrl],
+  )
+
+  // Send the order to Fahrévo OS first (it shows up live on the kitchen board), then hand the
+  // customer to WhatsApp with the order code. If the OS can't be reached, WhatsApp still works.
+  const [placing, setPlacing] = useState(false)
+  const placeOrder = useCallback(async () => {
+    setPlacing(true)
+    let ref = ''
+    try {
+      const ctrl = new AbortController()
+      const timer = setTimeout(() => ctrl.abort(), 6000)
+      const res = await fetch(`${OS_URL}/api/orders`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: items.map(x => ({ name: x.name, qty: x.qty })),
+          customer: { name: customerName, phone: customerPhone, address, mapsUrl },
+        }),
+        signal: ctrl.signal,
+      })
+      clearTimeout(timer)
+      const data = await res.json().catch(() => ({}))
+      if (res.ok && data.ok) ref = data.ref
+    } catch {
+      // OS offline — fall back to the plain WhatsApp order
+    }
+    setPlacing(false)
+    const url = buildWhatsappUrl({ items, ref, customerName, customerPhone, address, mapsUrl })
+    if (ref) setItems([])
+    return { ref, url }
   }, [items, customerName, customerPhone, address, mapsUrl])
 
   const value = useMemo(() => ({
-    items, open, setOpen, addItem, setQty, removeItem, clear, totalQty, whatsappUrl,
+    items, open, setOpen, addItem, setQty, removeItem, clear, totalQty, whatsappUrl, placeOrder, placing,
     customerName, setCustomerName, customerPhone, setCustomerPhone,
     address, setAddress, mapsUrl, locStatus, locError, requestAddress,
   }), [
-    items, open, addItem, setQty, removeItem, clear, totalQty, whatsappUrl,
+    items, open, addItem, setQty, removeItem, clear, totalQty, whatsappUrl, placeOrder, placing,
     customerName, customerPhone, address, mapsUrl, locStatus, locError, requestAddress,
   ])
 
