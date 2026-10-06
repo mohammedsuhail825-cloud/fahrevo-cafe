@@ -47,7 +47,10 @@ function detectAddress() {
 }
 
 // Fahrévo OS order inbox. Local demo: the OS runs on this machine; set VITE_FAHREVO_OS_URL when deployed.
-const OS_URL = (import.meta.env.VITE_FAHREVO_OS_URL || 'http://localhost:3100').replace(/\/$/, '')
+// Default: same machine that served this page, port 3100 — works on localhost and on the local Wi-Fi.
+const OS_URL = (
+  import.meta.env.VITE_FAHREVO_OS_URL || `${window.location.protocol}//${window.location.hostname}:3100`
+).replace(/\/$/, '')
 
 function buildWhatsappUrl({ items, ref, customerName, customerPhone, address, mapsUrl }) {
   if (!items.length) return `https://wa.me/${SITE.whatsapp}`
