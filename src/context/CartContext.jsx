@@ -47,9 +47,11 @@ function detectAddress() {
 }
 
 // Fahrévo OS order inbox. Local demo: the OS runs on this machine; set VITE_FAHREVO_OS_URL when deployed.
-// Default: same machine that served this page, port 3100 — works on localhost and on the local Wi-Fi.
+// Where orders go. Local/Wi-Fi demo: the OS on the same machine (port 3100). Online: the hosted OS.
+const isLocal = /^(localhost|127\.|10\.|192\.168\.|.*\.local$)/.test(window.location.hostname)
 const OS_URL = (
-  import.meta.env.VITE_FAHREVO_OS_URL || `${window.location.protocol}//${window.location.hostname}:3100`
+  import.meta.env.VITE_FAHREVO_OS_URL ||
+  (isLocal ? `${window.location.protocol}//${window.location.hostname}:3100` : 'https://fahrevo-kitchen.vercel.app')
 ).replace(/\/$/, '')
 
 function buildWhatsappUrl({ items, ref, customerName, customerPhone, address, mapsUrl }) {
