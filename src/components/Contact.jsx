@@ -1,45 +1,29 @@
 import { SITE } from '../data/site.js'
-import Reveal from './Reveal.jsx'
 
 export default function Contact() {
+  const whatsapp = `https://wa.me/${SITE.whatsapp}`
+
   return (
-    <section id="contact" className="section">
-      <Reveal as="header" className="section-head">
-        <p className="sec-mark">
-          <i className="d"></i>
-          <span>04</span>
-          <i className="d"></i>
-        </p>
-        <h2>Contact</h2>
-      </Reveal>
+    <section id="contact" className="contact">
+      <header className="section-head">
+        <p className="eyebrow">Contact</p>
+        <h2>Reach the kitchen.</h2>
+      </header>
 
-      <div className="contact-rows">
-        <Reveal className="c-row">
-          <span className="c-label">Based in</span>
-          <span className="c-value">
-            <strong className="c-name">{SITE.name}</strong>
-            <span className="c-addr">
-              Cloud kitchen · {SITE.area}
-            </span>
-          </span>
-        </Reveal>
-
-        <Reveal className="c-row">
-          <span className="c-label">Call</span>
-          <a className="c-tel" href={SITE.phoneHref}>
-            {SITE.phone}
-          </a>
-        </Reveal>
+      <div className="contact-block">
+        <div>
+          <span>Area</span>
+          <strong>{SITE.area}</strong>
+        </div>
+        <div>
+          <span>Call</span>
+          <a href={SITE.phoneHref}>{SITE.phone}</a>
+        </div>
+        <div>
+          <span>WhatsApp</span>
+          <a href={whatsapp} target="_blank" rel="noopener noreferrer">Message the kitchen</a>
+        </div>
       </div>
-
-      <Reveal className="contact-actions">
-        <a className="btn btn--solid" href={SITE.phoneHref}>
-          <span>Call Now</span>
-          <svg className="btn-arrow" viewBox="0 0 16 16" aria-hidden="true">
-            <path d="M1.5 8h12M9.5 3.5 14 8l-4.5 4.5" />
-          </svg>
-        </a>
-      </Reveal>
     </section>
   )
 }

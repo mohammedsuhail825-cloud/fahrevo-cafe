@@ -2,47 +2,18 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { NAV_ITEMS, SITE } from '../data/site.js'
 import { useCart } from '../context/CartContext.jsx'
 import useScrollSpy from '../hooks/useScrollSpy.js'
-import RollingText from './RollingText.jsx'
 import MobileMenu from './MobileMenu.jsx'
 
-const SPY_IDS = ['home', 'full-menu', 'about', 'contact']
+const SPY_IDS = ['home', 'about', 'contact']
 
-export default function Header() {
+export default function Header({ page }) {
   const headerRef = useRef(null)
   const toggleRef = useRef(null)
-  const [solid, setSolid] = useState(false)
-  const [pastHero, setPastHero] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
-  const active = useScrollSpy(SPY_IDS)
+  const spy = useScrollSpy(SPY_IDS, page)
+  const active = page === 'menu' ? 'full-menu' : spy
   const closeMenu = useCallback(() => setMenuOpen(false), [])
   const { totalQty, setOpen: setCartOpen } = useCart()
-
-  useEffect(() => {
-    let ticking = false
-    const update = () => {
-      const hero = document.getElementById('home')
-      const hh = headerRef.current ? headerRef.current.offsetHeight : 72
-      const past = hero ? hero.getBoundingClientRect().bottom <= hh + 12 : true
-      setPastHero(past)
-      setSolid(past || menuOpen)
-      ticking = false
-    }
-    const onScroll = () => { if (!ticking) { ticking = true; requestAnimationFrame(update) } }
-    window.addEventListener('scroll', onScroll, { passive: true })
-    window.addEventListener('resize', onScroll)
-    update()
-    return () => {
-      window.removeEventListener('scroll', onScroll)
-      window.removeEventListener('resize', onScroll)
-    }
-  }, [menuOpen])
-
-  useEffect(() => {
-    const hero = document.getElementById('home')
-    const hh = headerRef.current ? headerRef.current.offsetHeight : 72
-    const past = hero ? hero.getBoundingClientRect().bottom <= hh + 12 : window.scrollY > 24
-    setSolid(past || menuOpen)
-  }, [menuOpen])
 
   useEffect(() => {
     const sync = () => {
@@ -50,6 +21,8 @@ export default function Header() {
       const tabs = document.getElementById('menuTabs')
       const th = tabs ? tabs.offsetHeight : 0
       const root = document.documentElement
+      const prev = parseInt(root.style.getPropertyValue('--header-h'), 10)
+      if (!prev || Math.abs(prev - hh) > 1) root.style.setProperty('--header-h', hh + 'px')
       root.style.setProperty('--tabs-top', hh + 'px')
       root.style.setProperty('--menu-offset', (hh + th + 26) + 'px')
     }
@@ -74,29 +47,22 @@ export default function Header() {
 
   return (
     <>
-      <header
-        ref={headerRef}
-        id="siteHeader"
-        className={'site-header' + (solid ? ' is-solid' : '') + (pastHero ? ' is-past-hero' : '')}
-      >
+      <header ref={headerRef} id="siteHeader" className="site-header">
         <div className="header-inner">
-          <a className="brand" href="#home" aria-label="Fahrévo Cafe — home">
-            <span className="brand-lockup">
-              <span className="brand-name">{SITE.brand}</span>
-              <span className="brand-sub">Cafe</span>
-            </span>
+          <a className="brand" href="/" aria-label="Fahrévo Cafe — home">
+            <span className="brand-name">{SITE.brand}</span>
+            <span className="brand-sub">Cafe</span>
           </a>
 
           <nav className="site-nav" aria-label="Primary">
-            <ul>
-              {NAV_ITEMS.map(item => (
-                <li key={item.href}>
+            <ul key={page}>
+              {NAV_ITEMS.map((item, i) => (
+                <li key={item.href} style={{ '--i': i }}>
                   <a
                     className={'nav-link' + (active === item.id ? ' is-active' : '')}
                     href={item.href}
-                    aria-label={item.label}
                   >
-                    <RollingText text={item.label} />
+                    {item.label}
                   </a>
                 </li>
               ))}
@@ -107,7 +73,7 @@ export default function Header() {
             <button
               type="button"
               className="btn-cart"
-              aria-label={totalQty ? `Open cart, ${totalQty} items` : 'Open cart'}
+              aria-label={totalQty ? `Open cart, ${totalQty} ${totalQty === 1 ? 'item' : 'items'}` : 'Open cart'}
               onClick={() => setCartOpen(true)}
             >
               <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -116,14 +82,9 @@ export default function Header() {
                 <circle cx="9.5" cy="20" r="1.3" fill="currentColor"/>
                 <circle cx="17.5" cy="20" r="1.3" fill="currentColor"/>
               </svg>
+              <span className="btn-cart-label">Cart</span>
               {totalQty > 0 && <span className="btn-cart-count">{totalQty}</span>}
             </button>
-            <a className="btn-order" href="#order">
-              <span>Order</span>
-              <svg className="btn-arrow" viewBox="0 0 16 16" aria-hidden="true">
-                <path d="M1.5 8h12M9.5 3.5 14 8l-4.5 4.5" />
-              </svg>
-            </a>
             <button
               ref={toggleRef}
               className={'menu-toggle' + (menuOpen ? ' is-open' : '')}

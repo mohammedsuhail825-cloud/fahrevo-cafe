@@ -114,7 +114,7 @@ export default function Cart() {
             aria-disabled={!canOrder}
             onClick={e => { if (!canOrder) e.preventDefault() }}
           >
-            <span>Share order on WhatsApp</span>
+            <span>Send on WhatsApp</span>
             <svg className="btn-arrow" viewBox="0 0 16 16" aria-hidden="true"><path d="M1.5 8h12M9.5 3.5 14 8l-4.5 4.5"/></svg>
           </a>
         </footer>

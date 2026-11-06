@@ -1,65 +1,44 @@
-import { useEffect, useState } from 'react'
 import { SITE } from '../data/site.js'
 
-const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
 const hideImg = e => { e.currentTarget.style.display = 'none' }
 
 export default function Hero() {
-  const [entered, setEntered] = useState(false)
-
-  useEffect(() => {
-    if (reducedMotion() || !document.documentElement.classList.contains('intro-pending')) {
-      const raf = requestAnimationFrame(() => setEntered(true))
-      return () => cancelAnimationFrame(raf)
-    }
-    const reveal = () => setEntered(true)
-    window.addEventListener('cravings:intro-done', reveal, { once: true })
-    const fallback = setTimeout(reveal, 5200)
-    return () => {
-      window.removeEventListener('cravings:intro-done', reveal)
-      clearTimeout(fallback)
-    }
-  }, [])
-
   return (
-    <section className={'hero' + (entered ? ' is-entered' : '')} id="home">
-      <div className="hero-tree" aria-hidden="true">
-        <img src="/images/hero-tree-bg.png?v=2" alt="" decoding="async" />
+    <section className="hero" id="home">
+      <div className="hero-bloom" aria-hidden="true">
+        <svg className="hero-leaf hero-leaf--a" viewBox="0 0 80 150">
+          <path d="M40 142C40 92 6 58 40 8c34 50 0 84 0 134z" />
+          <path d="M40 128c0-36 0-72 0-104" />
+          <path d="M40 96c-12-4-20-14-24-26M40 72c12-2 22-12 26-24M40 52c-8-2-16-10-18-18" />
+        </svg>
+        <svg className="hero-leaf hero-leaf--b" viewBox="0 0 80 150">
+          <path d="M40 142C40 92 6 58 40 8c34 50 0 84 0 134z" />
+          <path d="M40 128c0-36 0-72 0-104" />
+          <path d="M40 96c-12-4-20-14-24-26M40 72c12-2 22-12 26-24" />
+        </svg>
       </div>
 
       <div className="hero-stage">
         <div className="hero-copy">
-          <p className="hero-overline">
-            <span aria-hidden="true">✦</span>
-            <span>Signature Cakes</span>
-            <span aria-hidden="true">✦</span>
+          <p className="hero-kicker">
+            <span>Kinder Bueno</span>
+            <span>Kinder Crunch</span>
           </p>
-          <h1 className="hero-title">
-            <span className="line">
-              <span className="line-inner" style={{ '--i': 0 }}>An Élevated Take</span>
-            </span>
-            <span className="line">
-              <span className="line-inner" style={{ '--i': 1 }}>
-                on <em>Sweet.</em>
-              </span>
-            </span>
-          </h1>
+          <p className="hero-script">Signature</p>
+          <h1 className="hero-name">Desserts</h1>
           <p className="hero-lede">
-            Crafted with indulgent flavors and a touch of {SITE.brand}.
+            Kinder Bueno and Kinder Crunch from our kitchen. Pick a cake, then send the order on WhatsApp.
           </p>
           <div className="hero-actions">
-            <a className="btn btn--ghost" href="#menu-items">
-              <span>Explore Menu</span>
-              <svg className="btn-arrow" viewBox="0 0 16 16" aria-hidden="true">
-                <path d="M1.5 8h12M9.5 3.5 14 8l-4.5 4.5" />
-              </svg>
+            <a className="btn btn--solid" href="/menu">See desserts</a>
+            <a className="btn btn--ghost" href={`https://wa.me/${SITE.whatsapp}`} target="_blank" rel="noopener noreferrer">
+              Order on WhatsApp
             </a>
           </div>
         </div>
 
         <div className="hero-visual">
           <img
-            className="hero-media"
             src={SITE.heroUrl}
             alt="Fahrévo Kinder Bueno signature cake"
             decoding="async"
@@ -68,6 +47,10 @@ export default function Hero() {
           />
         </div>
       </div>
+
+      <svg className="hero-wave" viewBox="0 0 1440 90" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M0 52C220 12 380 82 620 48C860 14 1040 74 1260 36C1340 22 1400 28 1440 34V90H0Z" />
+      </svg>
     </section>
   )
 }

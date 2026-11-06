@@ -45,11 +45,8 @@ function MobileMenuBase({ open, active, onClose }) {
       </nav>
       <div className="mobile-foot">
         <p className="m-hours">{SITE.area} · {SITE.phone}</p>
-        <a className="btn-order btn-order--full" href="#order" onClick={onClose}>
-          <span>Order on WhatsApp</span>
-          <svg className="btn-arrow" viewBox="0 0 16 16" aria-hidden="true">
-            <path d="M1.5 8h12M9.5 3.5 14 8l-4.5 4.5" />
-          </svg>
+        <a className="btn btn--solid btn--full" href="/menu" onClick={onClose}>
+          See desserts
         </a>
       </div>
     </div>

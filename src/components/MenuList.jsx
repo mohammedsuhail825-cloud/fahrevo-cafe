@@ -7,19 +7,71 @@ const itemName = item => (typeof item === 'string' ? item : item.name)
 const itemImg = item => (typeof item === 'string' ? null : item.img)
 const hideImg = e => { e.currentTarget.style.display = 'none' }
 
-export default function MenuList({ items, listKey, tabId, isSearch = false, onJump, focusName, onFocused }) {
+function DishCard({ item, staggerIndex }) {
+  const name = itemName(item)
+  const img = itemImg(item)
+  const { addItem, setQty, items } = useCart()
+  const qty = items.find(entry => entry.name === name)?.qty || 0
+
+  return (
+    <li className="dish" data-name={name} style={{ '--i': staggerIndex ?? 0 }}>
+      <div className="dish-photo">
+        {img && (
+          <img src={img} alt={name} loading="lazy" decoding="async" onError={hideImg} />
+        )}
+      </div>
+      <svg className="dish-wave" viewBox="0 0 1440 90" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M0 52C220 12 380 82 620 48C860 14 1040 74 1260 36C1340 22 1400 28 1440 34V90H0Z" />
+      </svg>
+      <div className="dish-body">
+        <h3 className="dish-name">{name}</h3>
+        {qty > 0 ? (
+          <div className="dish-qty">
+            <button type="button" aria-label={`Decrease ${name}`} onClick={() => setQty(name, qty - 1)}>−</button>
+            <span aria-live="polite">{qty}</span>
+            <button type="button" aria-label={`Increase ${name}`} onClick={() => setQty(name, qty + 1)}>+</button>
+          </div>
+        ) : (
+          <button type="button" className="dish-add" onClick={() => addItem(name)}>Add</button>
+        )}
+      </div>
+      <svg className="dish-foot" viewBox="0 0 1440 90" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M0 52C220 12 380 82 620 48C860 14 1040 74 1260 36C1340 22 1400 28 1440 34V90H0Z" />
+      </svg>
+    </li>
+  )
+}
+
+export default function MenuList({ items, listKey, focusName, onFocused }) {
   const [open, setOpen] = useState(false)
   const [instant, setInstant] = useState(false)
   const rootRef = useRef(null)
-  const { addItem } = useCart()
 
-  const count = isSearch ? 5 : PREVIEW
-  const first = items.slice(0, count)
-  const rest = items.slice(count)
+  const first = items.slice(0, PREVIEW)
+  const rest = items.slice(PREVIEW)
+
+  useEffect(() => {
+    const root = rootRef.current
+    if (!root) return
+    const cards = root.querySelectorAll('.dish')
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      cards.forEach(card => card.classList.add('is-in'))
+      return
+    }
+    const seen = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return
+        entry.target.classList.add('is-in')
+        seen.unobserve(entry.target)
+      })
+    }, { threshold: 0.22 })
+    cards.forEach(card => seen.observe(card))
+    return () => seen.disconnect()
+  }, [items, open])
 
   useEffect(() => {
     if (!focusName) return
-    const li = Array.from(rootRef.current.querySelectorAll('.mp-item'))
+    const li = Array.from(rootRef.current.querySelectorAll('.dish'))
       .find(el => (el.dataset.name || '').trim() === focusName)
     if (!li) { if (onFocused) onFocused(); return }
     setInstant(true)
@@ -32,83 +84,43 @@ export default function MenuList({ items, listKey, tabId, isSearch = false, onJu
       if (onFocused) onFocused()
     }, 140)
     return () => clearTimeout(t)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [focusName])
+  }, [focusName, onFocused])
 
   const toggle = () => {
     const next = !open
     setOpen(next)
-    if (!next) {
-      const view = rootRef.current.closest('.mp-view')
-      const sub = rootRef.current.closest('.mp-sub')
-      const head = (sub && sub.querySelector('.cat-head')) || (view && view.querySelector('.mp-cat-head'))
+    if (!next && rootRef.current) {
+      const head = rootRef.current.closest('.menu-section')?.querySelector('.section-head')
       if (head) {
         const headerH = (document.getElementById('siteHeader') || {}).offsetHeight || 72
-        const tabsH = (document.getElementById('menuTabs') || {}).offsetHeight || 44
-        if (head.getBoundingClientRect().top <= headerH + tabsH + 8) {
-          setTimeout(() => head.scrollIntoView({ behavior: smooth(), block: 'start' }), 580)
+        if (head.getBoundingClientRect().top <= headerH + 8) {
+          setTimeout(() => head.scrollIntoView({ behavior: smooth(), block: 'start' }), 420)
         }
       }
     }
   }
 
-  const renderItem = (item, i, stagger) => {
-    const name = itemName(item)
-    const img = itemImg(item)
-    const style = stagger ? { '--i': i } : undefined
-
-    if (isSearch) {
-      return (
-        <li className="mp-item mp-item--photo" key={name + '-' + i} style={style} data-name={name}>
-          <a href="#full-menu" onClick={e => { e.preventDefault(); if (onJump) onJump(tabId, name) }}>
-            {img && (
-              <span className="mi-photo">
-                <img src={img} alt="" loading="lazy" decoding="async" onError={hideImg} />
-              </span>
-            )}
-            <span className="mi-name">{name}</span>
-          </a>
-        </li>
-      )
-    }
-
-    return (
-      <li className="mp-item mp-item--photo" key={name + '-' + i} style={style} data-name={name}>
-        {img && (
-          <span className="mi-photo">
-            <img src={img} alt={name} loading="lazy" decoding="async" onError={hideImg} />
-          </span>
-        )}
-        <span className="mi-body">
-          <span className="mi-name">{name}</span>
-          <button type="button" className="mi-add" aria-label={`Add ${name} to cart`} onClick={() => addItem(name)}>
-            Add
-          </button>
-        </span>
-      </li>
-    )
-  }
-
   return (
     <div ref={rootRef}>
-      <ul className="mp-items mp-items--photos">{first.map((n, i) => renderItem(n, i, false))}</ul>
+      <ul className="dish-grid">
+        {first.map((item, i) => <DishCard key={itemName(item)} item={item} staggerIndex={i} />)}
+      </ul>
       {rest.length > 0 && (
         <>
-          <div className={'mp-expand' + (open ? ' is-open' : '') + (instant ? ' is-instant' : '')} id={'exp-' + listKey}>
-            <div className="mp-expand-clip" aria-hidden={!open}>
-              <ul className="mp-items mp-items--photos">{rest.map((n, i) => renderItem(n, i, true))}</ul>
-            </div>
+          <div className={'dish-more' + (open ? ' is-open' : '') + (instant ? ' is-instant' : '')} id={'exp-' + listKey}>
+            <ul className="dish-grid">
+              {rest.map((item, i) => <DishCard key={itemName(item)} item={item} staggerIndex={i} />)}
+            </ul>
           </div>
-          <div className="mp-more-row">
+          <div className="dish-more-row">
             <button
               type="button"
-              className={'mp-toggle' + (open ? ' is-open' : '')}
+              className="btn btn--ghost"
               aria-expanded={open}
               aria-controls={'exp-' + listKey}
               onClick={toggle}
             >
-              <span>{open ? 'Show Less' : 'Show More'}</span>
-              <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2.5v11M3.5 9 8 13.5 12.5 9"/></svg>
+              {open ? 'Show less' : 'Show more'}
             </button>
           </div>
         </>

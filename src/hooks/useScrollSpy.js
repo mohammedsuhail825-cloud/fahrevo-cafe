@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 
 /* lights the nav link of whichever section is in view */
-export default function useScrollSpy(ids) {
+export default function useScrollSpy(ids, watch) {
   const [active, setActive] = useState(ids[0])
   useEffect(() => {
     const spy = new IntersectionObserver(entries => {
@@ -19,6 +19,6 @@ export default function useScrollSpy(ids) {
     window.addEventListener('scroll', onScroll, { passive: true })
     onScroll()
     return () => { spy.disconnect(); window.removeEventListener('scroll', onScroll) }
-  }, [ids])
+  }, [watch])
   return active
 }

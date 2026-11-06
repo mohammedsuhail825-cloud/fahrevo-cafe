@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1100" viewBox="0 0 1600 1100" role="img" aria-label="">
+  <rect width="1600" height="1100" fill="#F6EFE4"/>
+  <g filter="url(#wash)" opacity=".9">
+    <ellipse cx="220" cy="160" rx="480" ry="340" fill="#D9C09A"/>
+    <ellipse cx="1240" cy="140" rx="440" ry="300" fill="#E6D0AE"/>
+    <ellipse cx="900" cy="640" rx="540" ry="360" fill="#FBF6EE"/>
+    <ellipse cx="340" cy="880" rx="500" ry="320" fill="#D7BC94"/>
+    <ellipse cx="1380" cy="820" rx="400" ry="280" fill="#EAD9C0"/>
+    <ellipse cx="720" cy="260" rx="280" ry="180" fill="#F7F1E6"/>
+  </g>
+  <rect width="1600" height="1100" filter="url(#grain)" opacity=".7"/>
+  <defs>
+    <filter id="wash" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="46"/>
+    </filter>
+    <filter id="grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" stitchTiles="stitch"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0.48  0 0 0 0 0.38  0 0 0 0 0.24  0 0 0 0.22 0"/>
+    </filter>
+  </defs>
+</svg>
