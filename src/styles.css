@@ -353,6 +353,10 @@ html.menu-open,html.menu-open body{overflow:hidden}
   height:100%;
   object-fit:contain;
   object-position:center;
+  filter:drop-shadow(22px 34px 32px rgba(44, 27, 19, .34)) drop-shadow(6px 12px 14px rgba(44, 27, 19, .22));
+}
+@media (prefers-reduced-motion: reduce){
+  .hero-visual img{filter:drop-shadow(14px 20px 20px rgba(44, 27, 19, .26))}
 }
 .hero-script{
   display:inline-block;
@@ -480,6 +484,9 @@ html.menu-open,html.menu-open body{overflow:hidden}
   overflow:hidden;
   display:flex;
   flex-direction:column;
+  /* Avoid subpixel seams while the card lifts on hover */
+  transform:translateZ(0);
+  backface-visibility:hidden;
 }
 html.js .dish{
   opacity:0;
@@ -487,44 +494,66 @@ html.js .dish{
   transition:opacity .8s var(--ease), transform .8s var(--ease);
   transition-delay:calc(var(--i, 0) * 120ms);
 }
-html.js .dish.is-in{opacity:1;transform:none}
+html.js .dish.is-in{opacity:1;transform:translateZ(0)}
 html.js .dish.is-in:hover{transform:translateY(-8px);transition-delay:0s}
 .dish.is-flash{outline:2px solid var(--gold);outline-offset:4px}
 .dish-photo{
   position:relative;
   aspect-ratio:5/4;
+  width:100%;
   background:var(--beige);
   overflow:hidden;
+  flex:none;
 }
 .dish-photo img{
-  width:100%;height:100%;
-  object-fit:cover;object-position:center 32%;
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center 68%;
+  transform:scale(1.26);
+  transform-origin:center 78%;
   transition:transform .7s var(--ease);
+  will-change:transform;
 }
-.dish.is-in:hover .dish-photo img{transform:scale(1.05)}
+/* Bueno: zoom in to the same crop as Crunch */
+.dish[data-name="Kinder Bueno"] .dish-photo img{
+  object-position:center 72%;
+  transform:scale(1.26);
+  transform-origin:center 78%;
+}
+.dish.is-in:hover .dish-photo img{transform:scale(1.34)}
+.dish[data-name="Kinder Bueno"].is-in:hover .dish-photo img{transform:scale(1.34)}
 .dish-wave{
   display:block;
   width:104%;
-  height:74px;
-  margin:-74px -2% 0;
+  height:78px;
+  /* Sit over the photo and overlap the body so no cocoa hairline opens on hover */
+  margin:-74px -2% -6px;
   fill:var(--beige);
   position:relative;
-  z-index:1;
+  z-index:2;
+  pointer-events:none;
+  flex:none;
 }
 .dish-body{
   position:relative;
   z-index:1;
   display:flex;align-items:center;justify-content:space-between;gap:16px;
-  padding:6px 20px 58px;
+  padding:10px 20px 58px;
+  margin-top:-2px;
+  background:var(--beige);
 }
 .dish-foot{
   display:block;
   width:104%;
-  height:56px;
-  margin:-56px -2% 0;
+  height:58px;
+  margin:-56px -2% -2px;
   fill:var(--cocoa);
   position:relative;
   z-index:2;
+  pointer-events:none;
+  flex:none;
 }
 .dish-name{
   font-size:clamp(1.7rem,2vw,2.15rem);
@@ -626,6 +655,7 @@ html.js .dish.is-in .dish-add:focus-visible{transform:translateY(-3px);transitio
   position:relative;
   display:flex;
   flex-direction:column;
+  height:100%;
   background:var(--beige);
   color:var(--cocoa);
   overflow:visible;
@@ -665,7 +695,12 @@ html.js .dish.is-in .dish-add:focus-visible{transform:translateY(-3px);transitio
 }
 .step-cap{transform:scaleY(-1);margin-bottom:-1px}
 .step-foot{margin-top:-36px}
-.step-body{padding:4px 16px 42px}
+.step-body{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  padding:4px 16px 42px;
+}
 .step-num{
   font-family:var(--font-serif);
   font-size:1.6rem;
@@ -902,9 +937,9 @@ html.cart-open,html.cart-open body{overflow:hidden}
   .menu-section,.contact{width:min(1120px, calc(100% - 32px))}
   .menu-section{padding-top:28px;padding-bottom:48px}
   .page-menu .menu-section{padding-top:calc(var(--header-h) + 24px)}
-  .dish-photo{aspect-ratio:3/2}
-  .dish-wave{height:52px;margin-top:-52px}
-  .dish-body{padding:4px 16px 48px}
+  .dish-photo{aspect-ratio:5/4}
+  .dish-wave{height:56px;margin:-52px -2% -6px}
+  .dish-body{padding:8px 16px 48px;margin-top:-2px}
   .dish-add,.dish-qty button{min-height:44px}
   .order{padding:48px 0 56px}
   .order-inner{width:min(1120px, calc(100% - 32px))}
@@ -968,7 +1003,8 @@ html.cart-open,html.cart-open body{overflow:hidden}
 
 @media (hover:none){
   html.js .dish.is-in:hover{transform:none}
-  html.js .dish.is-in:hover .dish-photo img{transform:none}
+  html.js .dish.is-in:hover .dish-photo img{transform:scale(1.26)}
+  html.js .dish[data-name="Kinder Bueno"].is-in:hover .dish-photo img{transform:scale(1.26)}
   .btn:hover,.dish-add:hover{transform:none;box-shadow:none}
 }
 
