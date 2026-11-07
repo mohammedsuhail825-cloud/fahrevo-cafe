@@ -7,7 +7,7 @@ export const SITE = {
   phoneHref: 'tel:+919160919897',
   whatsapp: '919160919897',
   addressLines: ['Cloud kitchen · Mehdipatnam,', 'Hyderabad'],
-  heroUrl: '/images/hero-cake.png?v=14',
+  heroUrl: '/images/hero-cake.png?v=16',
   aboutUrl: '/images/menu-crunch.png?v=5',
   instagram: null,
 }
